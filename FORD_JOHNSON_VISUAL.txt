@@ -1,0 +1,308 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    FORD-JOHNSON ALGORITHM VISUAL GUIDE                       ║
+║                         (Merge-Insertion Sort)                               ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ EXAMPLE: Sorting [5, 2, 9, 1, 7, 3, 8, 4]                                 ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                           PHASE 1: PAIR & COMPARE
+═══════════════════════════════════════════════════════════════════════════════
+
+Input Array:
+┌───┬───┬───┬───┬───┬───┬───┬───┐
+│ 5 │ 2 │ 9 │ 1 │ 7 │ 3 │ 8 │ 4 │
+└───┴───┴───┴───┴───┴───┴───┴───┘
+
+Step 1: Create Pairs
+        ┌─────┐   ┌─────┐   ┌─────┐   ┌─────┐
+        │ 5,2 │   │ 9,1 │   │ 7,3 │   │ 8,4 │
+        └─────┘   └─────┘   └─────┘   └─────┘
+
+Step 2: Compare within each pair (4 comparisons)
+        ┌─────┐   ┌─────┐   ┌─────┐   ┌─────┐
+        │ 5>2 │   │ 9>1 │   │ 7>3 │   │ 8>4 │
+        └──┬──┘   └──┬──┘   └──┬──┘   └──┬──┘
+           │         │         │         │
+        ┌──▼──┐   ┌─▼──┐   ┌──▼──┐   ┌──▼──┐
+        │ Max │   │Max │   │ Max │   │ Max │
+        │  5  │   │ 9  │   │  7  │   │  8  │
+        └─────┘   └────┘   └─────┘   └─────┘
+        ┌─────┐   ┌────┐   ┌─────┐   ┌─────┐
+        │ Min │   │Min │   │ Min │   │ Min │
+        │  2  │   │ 1  │   │  3  │   │  4  │
+        └─────┘   └────┘   └─────┘   └─────┘
+
+Result:
+        Winners (larger): [5, 9, 7, 8]
+        Losers (smaller): [2, 1, 3, 4]
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                      PHASE 2: RECURSIVELY SORT WINNERS
+═══════════════════════════════════════════════════════════════════════════════
+
+Input: [5, 9, 7, 8]
+
+  ┌────────────── RECURSIVE CALL ──────────────┐
+  │                                             │
+  │  Pair:  (5,9)  (7,8)                       │
+  │  Winners: [9, 8]                           │
+  │  Losers:  [5, 7]                           │
+  │                                             │
+  │    ┌──── RECURSIVE CALL ────┐              │
+  │    │                         │              │
+  │    │  Pair: (9,8)            │              │
+  │    │  Winners: [9]           │              │
+  │    │  Losers:  [8]           │              │
+  │    │  Sorted: [9]            │              │
+  │    │  Insert 8: [8, 9]       │              │
+  │    │                         │              │
+  │    └─────────────────────────┘              │
+  │                                             │
+  │  Insert losers [5, 7] into [8, 9]:         │
+  │    - Insert 5: [5, 8, 9]                   │
+  │    - Insert 7: [5, 7, 8, 9]                │
+  │                                             │
+  └─────────────────────────────────────────────┘
+
+Sorted Winners: [5, 7, 8, 9]
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                  PHASE 3: GENERATE JACOBSTHAL INSERTION ORDER
+═══════════════════════════════════════════════════════════════════════════════
+
+Losers to insert: [2, 1, 3, 4]  (indices: 0, 1, 2, 3)
+
+Jacobsthal Numbers:
+    J(0) = 0
+    J(1) = 1
+    J(2) = J(1) + 2×J(0) = 1 + 0 = 1
+    J(3) = J(2) + 2×J(1) = 1 + 2 = 3
+    J(4) = J(3) + 2×J(2) = 3 + 2 = 5
+    
+    Sequence: [0, 1, 1, 3, 5, 11, 21, 43, ...]
+              └───────────┘
+              Used for n=4
+
+Insertion Order Calculation:
+    
+    For k=1 (J[1]=1):
+        Insert indices from (1-1)=0 down to J[0]=0
+        → Index 0 ✓
+    
+    For k=2 (J[2]=1):
+        Insert indices from (1-1)=0 down to J[1]=1
+        → Already covered
+    
+    For k=3 (J[3]=3):
+        Insert indices from (3-1)=2 down to J[2]=1
+        → Index 2 ✓
+        → Index 1 ✓
+    
+    Remaining:
+        → Index 3 ✓
+
+Optimal Insertion Order: [0, 2, 1, 3]
+Corresponding Values:    [2, 3, 1, 4]
+
+WHY THIS ORDER?
+┌────────────────────────────────────────────────────────────────────────┐
+│ Jacobsthal order ensures binary search trees are traversed optimally  │
+│ Each insertion requires minimum comparisons based on tree structure   │
+│ This is what makes Ford-Johnson theoretically optimal!                │
+└────────────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                    PHASE 4: BINARY INSERT LOSERS
+═══════════════════════════════════════════════════════════════════════════════
+
+Starting sorted array: [5, 7, 8, 9]
+Losers to insert:      [2, 3, 1, 4] (in Jacobsthal order)
+
+
+┌─────────────────────── INSERT #1: Value 2 ───────────────────────┐
+│                                                                   │
+│  Current array: [5, 7, 8, 9]                                     │
+│  Insert: 2                                                       │
+│                                                                   │
+│  Binary Search:                                                  │
+│    Compare with middle: 7                                        │
+│    2 < 7, search left half                                       │
+│    Compare with 5                                                │
+│    2 < 5, insert at position 0                                   │
+│                                                                   │
+│  Result: [2, 5, 7, 8, 9]                                         │
+│          ↑                                                       │
+│          └─ Inserted here                                        │
+└───────────────────────────────────────────────────────────────────┘
+
+
+┌─────────────────────── INSERT #2: Value 3 ───────────────────────┐
+│                                                                   │
+│  Current array: [2, 5, 7, 8, 9]                                  │
+│  Insert: 3                                                       │
+│                                                                   │
+│  Binary Search:                                                  │
+│    Compare with middle: 7                                        │
+│    3 < 7, search left half                                       │
+│    Compare between 2 and 5                                       │
+│    2 < 3 < 5, insert at position 1                               │
+│                                                                   │
+│  Result: [2, 3, 5, 7, 8, 9]                                      │
+│             ↑                                                    │
+│             └─ Inserted here                                     │
+└───────────────────────────────────────────────────────────────────┘
+
+
+┌─────────────────────── INSERT #3: Value 1 ───────────────────────┐
+│                                                                   │
+│  Current array: [2, 3, 5, 7, 8, 9]                               │
+│  Insert: 1                                                       │
+│                                                                   │
+│  Binary Search:                                                  │
+│    Compare with middle: 7                                        │
+│    1 < 7, search left half                                       │
+│    Compare with 3                                                │
+│    1 < 3, search left                                            │
+│    Compare with 2                                                │
+│    1 < 2, insert at position 0                                   │
+│                                                                   │
+│  Result: [1, 2, 3, 5, 7, 8, 9]                                   │
+│           ↑                                                      │
+│           └─ Inserted here                                       │
+└───────────────────────────────────────────────────────────────────┘
+
+
+┌─────────────────────── INSERT #4: Value 4 ───────────────────────┐
+│                                                                   │
+│  Current array: [1, 2, 3, 5, 7, 8, 9]                            │
+│  Insert: 4                                                       │
+│                                                                   │
+│  Binary Search:                                                  │
+│    Compare with middle: 5                                        │
+│    4 < 5, search left half                                       │
+│    Compare with 2                                                │
+│    4 > 2, search right                                           │
+│    Between 3 and 5, insert at position 3                         │
+│                                                                   │
+│  Result: [1, 2, 3, 4, 5, 7, 8, 9]                                │
+│                    ↑                                             │
+│                    └─ Inserted here                              │
+└───────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                              FINAL RESULT
+═══════════════════════════════════════════════════════════════════════════════
+
+┌───┬───┬───┬───┬───┬───┬───┬───┐
+│ 1 │ 2 │ 3 │ 4 │ 5 │ 7 │ 8 │ 9 │  ✓ SORTED!
+└───┴───┴───┴───┴───┴───┴───┴───┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                          COMPLEXITY ANALYSIS
+═══════════════════════════════════════════════════════════════════════════════
+
+Comparisons Count:
+    
+    Phase 1 (Pairing):           n/2 comparisons
+                                 = 8/2 = 4 comparisons
+    
+    Phase 2 (Sort Winners):      T(n/2) recursively
+                                 = T(4) ≈ 6 comparisons
+    
+    Phase 3 (Binary Insertions): Each insertion: log₂(k) comparisons
+                                 Insert 2: log₂(4) = 2
+                                 Insert 3: log₂(5) = 3
+                                 Insert 1: log₂(6) = 3
+                                 Insert 4: log₂(7) = 3
+                                 Total: 11 comparisons
+    
+    Total Comparisons:           4 + 6 + 11 = 21 comparisons
+
+Comparison to Other Algorithms:
+    
+    QuickSort (average):         n log n ≈ 8 × log₂(8) = 24 comparisons
+    MergeSort:                   n log n ≈ 8 × log₂(8) = 24 comparisons
+    Ford-Johnson:                ~21 comparisons ✓ FEWER!
+    
+    Theoretical Minimum:         log₂(n!) ≈ 19.65 comparisons
+    Ford-Johnson:                Very close to optimal!
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                        WHY JACOBSTHAL NUMBERS?
+═══════════════════════════════════════════════════════════════════════════════
+
+Binary Search Tree Structure:
+
+When we insert elements, we're implicitly building a binary search tree.
+Jacobsthal numbers align perfectly with this tree structure!
+
+Example with 7 elements to insert:
+
+        Regular Order (0,1,2,3,4,5,6):
+        ├─ Unbalanced searches
+        └─ More comparisons needed
+
+        Jacobsthal Order (0,2,1,5,4,3,6):
+        ├─ Balanced tree traversal
+        ├─ Optimal search depth
+        └─ Minimum comparisons! ✓
+
+The "gaps" created by Jacobsthal numbers ensure:
+    1. Each insertion has maximum information from previous insertions
+    2. Binary search trees remain balanced
+    3. Total comparisons are minimized
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                         KEY INSIGHTS
+═══════════════════════════════════════════════════════════════════════════════
+
+✓ Pairing reduces problem size by half immediately
+✓ Recursive sorting handles complexity elegantly
+✓ Jacobsthal order is the "secret sauce" for optimality
+✓ Binary insertion leverages sorted structure
+✓ Total comparisons approach theoretical minimum
+
+Ford-Johnson is beautiful because:
+    • Theoretically optimal (minimizes comparisons)
+    • Mathematically elegant (uses Jacobsthal sequence)
+    • Practically complex (trade-off for optimality)
+    • Educational value (demonstrates advanced algorithm design)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                    VECTOR vs DEQUE PERFORMANCE
+═══════════════════════════════════════════════════════════════════════════════
+
+std::vector:
+    Memory:    [■][■][■][■][■][■][■][■]  ← Contiguous
+    Access:    O(1)  ✓ Fast
+    Insert:    O(n)  Must shift elements
+    Cache:     Excellent locality
+
+std::deque:
+    Memory:    [■■][■■] ... [■■][■■]     ← Chunks
+    Access:    O(1)  ✓ Fast
+    Insert:    O(n)  But better than vector for middle insertions
+    Cache:     Good, but not as good as vector
+
+For Ford-Johnson:
+    • Many binary searches favor: VECTOR (cache locality)
+    • Middle insertions favor: DEQUE (less data movement)
+    • Small datasets: VECTOR usually wins (cache > insert cost)
+    • Large datasets: Performance depends on data patterns
+
+Typical Results:
+    Small (n < 100):     Vector faster
+    Medium (100-1000):   Roughly equal
+    Large (n > 1000):    Depends on insertion patterns
